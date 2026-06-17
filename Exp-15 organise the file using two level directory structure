@@ -1,0 +1,19 @@
+/* two_level_dir.c */
+#include <stdio.h>
+#include <string.h>
+#define MAXU 20
+#define MAXF 50
+typedef struct { char uname[30]; char files[MAXF][30]; int fcount; } UserDir;
+UserDir users[MAXU]; int ucount=0;
+int findu(char *u){ for(int i=0;i<ucount;i++) if(strcmp(users[i].uname,u)==0) return i; return -1; }
+int main(){
+    int ch; char uname[30], fname[30];
+    do{
+        printf("1-CreateUserDir 2-CreateFile 3-ListFiles 4-Search 0-Exit: "); scanf("%d",&ch);
+        if(ch==1){ printf("User: "); scanf("%s",uname); if(findu(uname)==-1){ strcpy(users[ucount].uname,uname); users[ucount].fcount=0; ucount++; } else printf("Exists\n"); }
+        else if(ch==2){ printf("User File: "); scanf("%s %s", uname, fname); int i=findu(uname); if(i==-1) printf("User not found\n"); else strcpy(users[i].files[users[i].fcount++], fname); }
+        else if(ch==3){ printf("User: "); scanf("%s", uname); int i=findu(uname); if(i==-1) printf("No such user\n"); else for(int j=0;j<users[i].fcount;j++) printf("%s\n", users[i].files[j]); }
+        else if(ch==4){ printf("User File: "); scanf("%s %s", uname, fname); int i=findu(uname); if(i==-1) printf("No user\n"); else { int found=0; for(int j=0;j<users[i].fcount;j++) if(strcmp(users[i].files[j],fname)==0) found=1; printf(found?"Found\n":"Not found\n"); } }
+    }while(ch!=0);
+    return 0;
+}
