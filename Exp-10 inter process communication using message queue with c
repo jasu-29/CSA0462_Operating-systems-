@@ -1,0 +1,31 @@
+/* msgq_example.c
+   Parent sends a message; child receives it */
+#include <stdio.h>
+#include <sys/ipc.h>
+#include <sys/msg.h>
+#include <string.h>
+#include <unistd.h>
+#include <stdlib.h>
+
+struct msgbuf { long mtype; char mtext[100]; };
+
+int main(){
+    key_t key = ftok(".", 'M');
+    int msqid = msgget(key, IPC_CREAT | 0666);
+    if(msqid < 0){ perror("msgget"); return 1; }
+    if(fork()==0){
+        struct msgbuf msg;
+        msgrcv(msqid, &msg, sizeof(msg.mtext), 1, 0);
+        printf("Child received: %s\n", msg.mtext);
+        return 0;
+    } else {
+        struct msgbuf msg;
+        msg.mtype = 1;
+        printf("Parent: enter message: ");
+        fgets(msg.mtext, sizeof(msg.mtext), stdin);
+        msgsnd(msqid, &msg, strlen(msg.mtext)+1, 0);
+        wait(NULL);
+        msgctl(msqid, IPC_RMID, NULL);
+    }
+    return 0;
+}
