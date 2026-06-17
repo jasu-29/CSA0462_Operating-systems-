@@ -1,0 +1,34 @@
+/* mem_alloc_sim.c
+   Simple simulation: free blocks list; allocate / deallocate by id */
+#include <stdio.h>
+#include <limits.h>
+#define MAXB 10
+typedef struct { int size; int free; int id; } Block;
+int main(){
+    Block blocks[MAXB];
+    int b;
+    printf("Number of memory blocks: "); scanf("%d",&b);
+    for(int i=0;i<b;i++){ printf("Size of block %d: ", i); scanf("%d",&blocks[i].size); blocks[i].free=1; blocks[i].id=-1; }
+    int choice;
+    do{
+        printf("\n1-FirstFit 2-BestFit 3-WorstFit 4-Show 0-Exit: "); scanf("%d",&choice);
+        if(choice>=1 && choice<=3){
+            int pid, req; printf("PID and requested size: "); scanf("%d %d",&pid,&req);
+            int idx=-1;
+            if(choice==1){
+                for(int i=0;i<b;i++) if(blocks[i].free && blocks[i].size>=req){ idx=i; break; }
+            } else if(choice==2){
+                int best=INT_MAX;
+                for(int i=0;i<b;i++) if(blocks[i].free && blocks[i].size>=req && blocks[i].size<best){ best=blocks[i].size; idx=i; }
+            } else {
+                int worst=-1;
+                for(int i=0;i<b;i++) if(blocks[i].free && blocks[i].size>=req && blocks[i].size>worst){ worst=blocks[i].size; idx=i; }
+            }
+            if(idx==-1) printf("No suitable block found\n"); else { blocks[idx].free=0; blocks[idx].id=pid; printf("Allocated block %d\n", idx); }
+        } else if(choice==4){
+            printf("Block#\tSize\tFree\tPID\n");
+            for(int i=0;i<b;i++) printf("%d\t%d\t%d\t%d\n",i,blocks[i].size,blocks[i].free,blocks[i].id);
+        }
+    }while(choice!=0);
+    return 0;
+}
