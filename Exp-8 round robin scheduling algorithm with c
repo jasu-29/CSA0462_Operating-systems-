@@ -1,0 +1,24 @@
+/* round_robin.c */
+#include <stdio.h>
+
+int main(){
+    int n, qt; printf("Number of processes: "); scanf("%d",&n);
+    int at[n], bt[n], rem[n], ct[n], done[n];
+    for(int i=0;i<n;i++){ printf("AT BT for P%d: ", i+1); scanf("%d %d",&at[i], &bt[i]); rem[i]=bt[i]; done[i]=0; }
+    printf("Time quantum: "); scanf("%d",&qt);
+    int t=0, completed=0;
+    int queue[1000], front=0, rear=0, inq[n]; for(int i=0;i<n;i++) inq[i]=0;
+    // enqueue processes as they arrive
+    while(completed<n){
+        for(int i=0;i<n;i++) if(at[i]<=t && !inq[i] && rem[i]>0){ queue[rear++]=i; inq[i]=1; }
+        if(front==rear){ t++; continue; }
+        int i = queue[front++]; // dequeue
+        int exec = (rem[i] > qt) ? qt : rem[i];
+        rem[i] -= exec; t += exec;
+        for(int j=0;j<n;j++) if(at[j]<=t && !inq[j] && rem[j]>0){ queue[rear++]=j; inq[j]=1; }
+        if(rem[i]>0) queue[rear++]=i; else { ct[i]=t; completed++; }
+    }
+    printf("P#\tAT\tBT\tCT\tTAT\tWT\n");
+    for(int i=0;i<n;i++){ int tat = ct[i]-at[i], wt = tat - bt[i]; printf("P%d\t%d\t%d\t%d\t%d\t%d\n",i+1,at[i],bt[i],ct[i],tat,wt); }
+    return 0;
+}
