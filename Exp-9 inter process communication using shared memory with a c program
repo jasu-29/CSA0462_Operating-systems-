@@ -1,0 +1,29 @@
+/* shm_example.c
+   Parent writes a string into shared memory, child reads it */
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/shm.h>
+#include <sys/ipc.h>
+#include <string.h>
+#include <unistd.h>
+int main(){
+    key_t key = ftok(".", 'S');
+    int shmid = shmget(key, 1024, IPC_CREAT | 0666);
+    if(shmid<0){ perror("shmget"); return 1; }
+    char *data = (char*) shmat(shmid, NULL, 0);
+    if(fork()==0){
+        // child reads
+        sleep(1);
+        printf("Child read from shm: %s\n", data);
+        shmdt(data);
+        return 0;
+    } else {
+        // parent writes
+        printf("Parent: enter message: ");
+        fgets(data, 1024, stdin);
+        wait(NULL);
+        shmdt(data);
+        shmctl(shmid, IPC_RMID, NULL);
+    }
+    return 0;
+}
