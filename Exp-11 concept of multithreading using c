@@ -1,0 +1,29 @@
+/* pthread_sum.c */
+#include <stdio.h>
+#include <pthread.h>
+#include <stdlib.h>
+
+typedef struct { int start, end; long sum; } Task;
+
+void *worker(void *arg){
+    Task *t = (Task*)arg;
+    long s=0;
+    for(int i=t->start;i<=t->end;i++) s+=i;
+    t->sum = s;
+    return NULL;
+}
+
+int main(){
+    int nthreads=4, N=100;
+    pthread_t th[nthreads];
+    Task tasks[nthreads];
+    int chunk = N/nthreads;
+    for(int i=0;i<nthreads;i++){
+        tasks[i].start = i*chunk + 1;
+        tasks[i].end = (i==nthreads-1) ? N : (i+1)*chunk;
+        pthread_create(&th[i], NULL, worker, &tasks[i]);
+    }
+    long total=0; for(int i=0;i<nthreads;i++){ pthread_join(th[i], NULL); total += tasks[i].sum; }
+    printf("Sum 1..%d = %ld\n", N, total);
+    return 0;
+}
