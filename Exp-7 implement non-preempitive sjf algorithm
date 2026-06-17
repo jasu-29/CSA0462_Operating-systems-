@@ -1,0 +1,27 @@
+/* priority_preemptive.c */
+#include <stdio.h>
+#include <limits.h>
+
+int main(){
+    int n; printf("Number of processes: "); scanf("%d",&n);
+    int at[n], bt[n], rem[n], pr[n], ct[n], start=0;
+    for(int i=0;i<n;i++){ printf("AT BT Priority for P%d: ",i+1); scanf("%d %d %d",&at[i],&bt[i],&pr[i]); rem[i]=bt[i]; ct[i]=-1; }
+    int t=0, completed=0;
+    while(completed<n){
+        int idx=-1, best=INT_MAX;
+        for(int i=0;i<n;i++){
+            if(at[i]<=t && rem[i]>0 && pr[i]<best){
+                best=pr[i]; idx=i;
+            }
+        }
+        if(idx==-1){ t++; continue; }
+        rem[idx]--; t++;
+        if(rem[idx]==0){ ct[idx]=t; completed++; }
+    }
+    printf("P#\tAT\tBT\tPR\tCT\tTAT\tWT\n");
+    for(int i=0;i<n;i++){
+        int tat=ct[i]-at[i], wt=tat - bt[i];
+        printf("P%d\t%d\t%d\t%d\t%d\t%d\t%d\n", i+1, at[i], bt[i], pr[i], ct[i], tat, wt);
+    }
+    return 0;
+}
