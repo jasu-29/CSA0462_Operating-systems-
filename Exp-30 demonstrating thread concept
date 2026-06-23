@@ -1,0 +1,33 @@
+#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
+
+void* threadFunc(void* arg) {
+    pthread_t tid_self = pthread_self();  // Get thread ID of this thread
+    pthread_t tid_main = *(pthread_t*)arg; // Main thread ID passed as argument
+
+    printf("Thread started (create concept)\n");
+
+    // Thread equal demonstration
+    if (pthread_equal(tid_self, tid_main))
+        printf("Thread is same as main thread\n");
+    else
+        printf("Thread is different from main thread (equal concept)\n");
+
+    printf("Thread is exiting (exit concept)\n");
+    pthread_exit(NULL);  // Exit the thread
+}
+
+int main() {
+    pthread_t tid;          // Thread ID for new thread
+    pthread_t main_tid = pthread_self(); // Main thread ID
+
+    // Thread creation
+    pthread_create(&tid, NULL, threadFunc, &main_tid);
+
+    // Thread join
+    pthread_join(tid, NULL); // Wait for thread to finish
+    printf("Thread has finished (join concept)\n");
+
+    return 0;
+}
