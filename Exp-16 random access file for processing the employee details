@@ -1,0 +1,31 @@
+/* random_access_employee.c */
+#include <stdio.h>
+#include <string.h>
+
+typedef struct { int id; char name[30]; int age; float salary; } Emp;
+
+int main(){
+    FILE *f = fopen("employees.dat","r+b");
+    if(!f) f = fopen("employees.dat","w+b");
+    int choice;
+    do{
+        printf("1-Add 2-ReadByRecord 3-UpdateByRecord 4-List 0-Exit: "); scanf("%d",&choice);
+        if(choice==1){
+            Emp e; printf("ID Name Age Salary: "); scanf("%d %s %d %f",&e.id,e.name,&e.age,&e.salary);
+            fseek(f,0,SEEK_END); fwrite(&e,sizeof(Emp),1,f); fflush(f);
+        } else if(choice==2){
+            int rec; printf("Record number (0-based): "); scanf("%d",&rec);
+            fseek(f, rec * sizeof(Emp), SEEK_SET);
+            Emp e; if(fread(&e,sizeof(Emp),1,f)) printf("%d %s %d %.2f\n", e.id, e.name, e.age, e.salary); else printf("No record\n");
+        } else if(choice==3){
+            int rec; printf("Record number to update: "); scanf("%d",&rec);
+            Emp e; printf("New ID Name Age Salary: "); scanf("%d %s %d %f",&e.id,e.name,&e.age,&e.salary);
+            fseek(f, rec * sizeof(Emp), SEEK_SET); fwrite(&e,sizeof(Emp),1,f); fflush(f);
+        } else if(choice==4){
+            fseek(f,0,SEEK_SET); Emp e; int i=0;
+            while(fread(&e,sizeof(Emp),1,f)) { printf("[%d] %d %s %d %.2f\n", i++, e.id, e.name, e.age, e.salary); }
+        }
+    }while(choice!=0);
+    fclose(f);
+    return 0;
+}
