@@ -1,0 +1,28 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+
+#define MAX 1000  // Maximum length of a line
+
+int main(int argc, char *argv[]) {
+    if (argc != 3) {
+        printf("Usage: %s <filename> <pattern>\n", argv[0]);
+        return 1;
+    }
+
+    FILE *file = fopen(argv[1], "r");
+    if (file == NULL) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    char line[MAX];
+    while (fgets(line, MAX, file) != NULL) {
+        if (strstr(line, argv[2]) != NULL) { // Check if pattern exists in line
+            printf("%s", line);
+        }
+    }
+
+    fclose(file);
+    return 0;
+}
