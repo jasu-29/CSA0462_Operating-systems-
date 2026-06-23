@@ -1,0 +1,61 @@
+/* bankers.c
+   Classic Banker's algorithm: safe-state check and request simulation */
+#include <stdio.h>
+#include <stdbool.h>
+
+int main(){
+    int n, m;
+    printf("Processes: "); scanf("%d",&n);
+    printf("Resources: "); scanf("%d",&m);
+    int alloc[n][m], max[n][m], need[n][m], avail[m];
+    printf("Enter Allocation matrix:\n"); for(int i=0;i<n;i++) for(int j=0;j<m;j++) scanf("%d",&alloc[i][j]);
+    printf("Enter Max matrix:\n"); for(int i=0;i<n;i++) for(int j=0;j<m;j++) scanf("%d",&max[i][j]);
+    printf("Available resources:\n"); for(int j=0;j<m;j++) scanf("%d",&avail[j]);
+    for(int i=0;i<n;i++) for(int j=0;j<m;j++) need[i][j]=max[i][j]-alloc[i][j];
+    // Safety algorithm
+    int work[m]; for(int j=0;j<m;j++) work[j]=avail[j];
+    bool finish[n]; for(int i=0;i<n;i++) finish[i]=false;
+    int safe[n], idx=0;
+    for(int count=0; count<n; ){
+        bool found=false;
+        for(int i=0;i<n;i++) if(!finish[i]){
+            bool ok=true;
+            for(int j=0;j<m;j++) if(need[i][j] > work[j]) { ok=false; break; }
+            if(ok){
+                for(int j=0;j<m;j++) work[j]+=alloc[i][j];
+                safe[idx++]=i; finish[i]=true; found=true; count++;
+            }
+        }
+        if(!found) break;
+    }
+    bool safeState = true; for(int i=0;i<n;i++) if(!finish[i]) safeState=false;
+    if(safeState){ printf("System is in safe state. Safe sequence: "); for(int i=0;i<n;i++) printf("P%d ", safe[i]); printf("\n"); }
+    else printf("System is NOT in safe state (unsafe).\n");
+    // Optional: handle a resource request
+    int pid; printf("Enter process requesting resources (or -1 to exit): "); scanf("%d",&pid);
+    if(pid>=0 && pid<n){
+        int req[m]; printf("Enter request vector: "); for(int j=0;j<m;j++) scanf("%d",&req[j]);
+        bool can=true;
+        for(int j=0;j<m;j++) if(req[j] > need[pid][j] || req[j] > avail[j]) can=false;
+        if(!can) printf("Request cannot be granted immediately (exceeds need or available)\n");
+        else {
+            // pretend allocate
+            for(int j=0;j<m;j++){ avail[j]-=req[j]; alloc[pid][j]+=req[j]; need[pid][j]-=req[j]; }
+            // safety check again
+            int work2[m]; for(int j=0;j<m;j++) work2[j]=avail[j];
+            bool finish2[n]; for(int i=0;i<n;i++) finish2[i]=false;
+            int idx2=0;
+            for(int count=0; count<n; ){
+                bool found=false;
+                for(int i=0;i<n;i++) if(!finish2[i]){
+                    bool ok=true; for(int j=0;j<m;j++) if(need[i][j] > work2[j]) { ok=false; break; }
+                    if(ok){ for(int j=0;j<m;j++) work2[j]+=alloc[i][j]; finish2[i]=true; found=true; count++; }
+                }
+                if(!found) break;
+            }
+            bool safe2=true; for(int i=0;i<n;i++) if(!finish2[i]) safe2=false;
+            printf(safe2? "Request can be safely granted.\n":"Request CANNOT be granted (would lead to unsafe state).\n");
+        }
+    }
+    return 0;
+}
