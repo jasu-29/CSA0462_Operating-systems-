@@ -1,0 +1,41 @@
+/* file_ops.c
+   Basic file management commands: create/write/append/read/rename/copy/delete
+   Compile: gcc file_ops.c -o file_ops
+   Run: ./file_ops
+*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+void copy_file(const char *src, const char *dst) {
+    FILE *in = fopen(src, "rb");
+    FILE *out = fopen(dst, "wb");
+    if (!in || !out) { perror("fopen"); if (in) fclose(in); if (out) fclose(out); return; }
+    char buf[4096]; size_t n;
+    while ((n = fread(buf,1,sizeof(buf),in)) > 0) fwrite(buf,1,n,out);
+    fclose(in); fclose(out);
+}
+
+int main() {
+    const char *f1 = "fm1.txt", *f2 = "fm2.txt";
+    FILE *fp = fopen(f1, "w");
+    fprintf(fp, "File management demo\n");
+    fclose(fp);
+
+    fp = fopen(f1, "a");
+    fprintf(fp, "Appending a line\n");
+    fclose(fp);
+
+    fp = fopen(f1, "r");
+    char line[256];
+    printf("Contents of %s:\n", f1);
+    while (fgets(line, sizeof(line), fp)) printf("%s", line);
+    fclose(fp);
+
+    copy_file(f1, f2);
+    rename(f2, "fm2_renamed.txt");
+    remove(f1);
+    remove("fm2_renamed.txt");
+
+    return 0;
+}
